@@ -1,4 +1,4 @@
-# Part 2
+# Part 3
 
 *Date: 2025-03-12*
 
@@ -30,7 +30,26 @@ cat > bridge.sh << EOF
 nmcli con down enp2s0
 nmcli con up br0
 EOF
+sh ./bridge.sh
 
 virsh net-destroy default
 virsh net-autostart default --disable
+
+cat > bridge.xml << EOF
+<network>
+  <name>br0</name>
+  <forward mode="bridge"/>
+  <bridge name="br0" />
+</network>
+EOF
+virsh net-define ./bridge.xml
+virsh net-start br0
+virsh net-autostart br0
+
+firewall-cmd --permanent --zone=trusted --add-interface=br0
+
+firewall-cmd --permanent --direct --add-rule ipv4 filter FORWARD 0 -i br0 -o br0 -j ACCEPT
+
+firewall-cmd --reload
+
 ```

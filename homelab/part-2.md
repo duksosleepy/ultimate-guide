@@ -179,7 +179,7 @@ vm.vfs_cache_pressure = 50
 
 fs.file-max = 2097152
 
-vm.nr_hugepages = 48
+vm.nr_hugepages = 54
 vm.hugetlb_shm_group = 36
 vm.nr_overcommit_hugepages = 4
 EOF
