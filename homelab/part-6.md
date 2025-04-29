@@ -4,6 +4,6 @@
 
 ## Create WireGuard Topologies for security
 
-## Wireguard Server
+## Wireguard Client
 
 ### Update & Upgrade

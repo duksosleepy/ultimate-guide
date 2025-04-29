@@ -106,3 +106,9 @@ virt-install \
   --noautoconsole \
   --cdrom /var/lib/libvirt/images-thin/iso/ubuntu-24.04.2-live-server-amd64.iso
 ```
+
+### Check the number of nodes created along with the Operating system information
+```bash
+kubectl get nodes -o wide
+kubectl get node talos-default-worker-1 -o json | jq -r '.status.nodeInfo.osImage'
+```
