@@ -141,32 +141,19 @@ networks:
   proxy:
     name: proxy_network
     external: true
-  agent-network:
-    name: agent_network
-    external: true
 services:
-  agent:
-    image: portainer/agent:latest
-    container_name: portainer-agent
-    restart: unless-stopped
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
-      - /var/lib/docker/volumes:/var/lib/docker/volumes
-    networks:
-      - agent-network
-
   portainer:
     container_name: portainer
-    image: portainer/portainer-ce:latest
-    restart: unless-stopped
-    command: -H tcp://agent:9001 --tlsskipverify
+    image: portainer/portainer-ce:latest                                                                                                                          restart: unless-stopped
     volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
       - portainer_data:/data
+    ports:
+      - "8000:8000"
     expose:
       - 9443
     networks:
       - proxy
-      - agent-network
 volumes:
   portainer_data:
 ```
