@@ -18,4 +18,4 @@ docker run -d -p 9001:9001 --name portainer_agent --restart=always -v /var/run/d
 ```
 ## Result
 
-![Auth Server](/img/authserver.png)
+![Auth Server](img/authserver.png)
