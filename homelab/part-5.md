@@ -18,7 +18,7 @@ sudo apt install -y curl wget git apt-transport-https ca-certificates gnupg lsb-
 
 ```bash
 curl -fsSL https://get.docker.com -o get-docker.sh
-  sh get-docker.sh
+sh get-docker.sh
 sudo usermod -aG docker $USER
 
 sudo apt update

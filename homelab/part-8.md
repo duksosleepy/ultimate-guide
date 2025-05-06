@@ -30,8 +30,6 @@ nano docker-compose.yml
 networks:
   proxy:
     name: proxy_network
-  agent-network:
-    name: agent_network
 services:
   caddy:
     container_name: caddy
@@ -160,3 +158,29 @@ volumes:
 ```
 
 Portainer available in: https://portainer.duksosleepy.dev
+
+```bash
+vault.duksosleepy.dev {
+    tls {
+        dns cloudflare {env.CLOUDFLARE_API_TOKEN}
+    }
+
+    @websockets {
+        header Connection *Upgrade*
+        header Upgrade websocket
+    }
+    reverse_proxy @websockets 192.168.1.6:80
+
+    reverse_proxy 192.168.1.6:80 {
+        header_up X-Real-IP {remote_host}
+        header_up X-Forwarded-For {remote_host}
+        header_up X-Forwarded-Proto https
+        header_up X-Forwarded-Host {host}
+        header_up Host {host}
+        transport http {
+            keepalive 30s
+            keepalive_idle_conns 10
+        }
+    }
+}
+```
