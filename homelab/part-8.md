@@ -30,6 +30,7 @@ nano docker-compose.yml
 networks:
   proxy:
     name: proxy_network
+    external: true
 services:
   caddy:
     container_name: caddy
@@ -40,7 +41,7 @@ services:
       - "443:443"
       - "443:443/udp"
     volumes:
-      - ./config/Caddyfile:/etc/caddy/Caddyfile:ro
+      - ./config/Caddyfile:/etc/caddy/Caddyfile
       - ./caddy_data:/data
       - ./caddy_config:/config
     environment:
@@ -55,77 +56,65 @@ services:
 mkdir -p data config
 nano config/Caddyfile
 {
-    dynamic_dns {
-        provider cloudflare {env.CLOUDFLARE_API_TOKEN}
-        domains {
-            duksosleepy.dev portainer
-            duksosleepy.dev k8s
+        dynamic_dns {
+                provider cloudflare {env.CLOUDFLARE_API_TOKEN}
+                domains {
+                        duksosleepy.dev portainer
+                        duksosleepy.dev k8s
+                        duksosleepy.dev vault
+                }
         }
-    }
-    # Global options
-    email songkhoi123@gmail.com
-    acme_dns cloudflare {
-        api_token env.CLOUDFLARE_API_TOKEN
-    }
+        email songkhoi123@gmail.com
+        acme_dns cloudflare {
+                api_token env.CLOUDFLARE_API_TOKEN
+        }
 }
 
-# Portainer configuration
 portainer.duksosleepy.dev {
-    tls {
-        dns cloudflare {env.CLOUDFLARE_API_TOKEN}
-    }
-
-    reverse_proxy portainer:9443 {
-        transport http {
-            tls
-            tls_insecure_skip_verify
+        tls {
+                dns cloudflare {env.CLOUDFLARE_API_TOKEN}
         }
-    }
 
-    header {
-        Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
-        X-Content-Type-Options "nosniff"
-        X-Frame-Options "SAMEORIGIN"
-        Referrer-Policy "strict-origin-when-cross-origin"
-        -Server
-    }
-
-    # Logging
-    log {
-        output file /data/logs/portainer-access.log {
-            roll_size 10MB
-            roll_keep 5
+        reverse_proxy portainer:9443 {
+                transport http {
+                        tls
+                        tls_insecure_skip_verify
+                }
         }
-        format json
-    }
 }
 
 # Kubernetes main entry
 k8s.duksosleepy.dev {
-    tls {
-        dns cloudflare {env.CLOUDFLARE_API_TOKEN}
-    }
-
-    reverse_proxy 192.168.1.27:80 {
-        header_up Host {host}
-    }
-
-    header {
-        Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
-        X-Content-Type-Options "nosniff"
-        Referrer-Policy "strict-origin-when-cross-origin"
-        -Server
-    }
-
-    # Logging
-    log {
-        output file /data/logs/k8s-access.log {
-            roll_size 10MB
-            roll_keep 5
+        tls {
+                dns cloudflare {env.CLOUDFLARE_API_TOKEN}
         }
-        format json
-    }
+
+        reverse_proxy 192.168.1.27:80 {
+                header_up Host {host}
+        }
+
+        header {
+                Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+                X-Content-Type-Options "nosniff"
+                Referrer-Policy "strict-origin-when-cross-origin"
+                -Server
+        }
+
+        # Logging
+        log {
+                output file /data/logs/k8s-access.log {
+                        roll_size 10MB
+                        roll_keep 5
+                }
+                format json
+        }
 }
+```
+
+```bash
+docker compose down
+docker compose up --build -d
+docker compose exec caddy caddy fmt --overwrite /etc/caddy/Caddyfile
 ```
 
 ### Setup Portainer
@@ -158,29 +147,3 @@ volumes:
 ```
 
 Portainer available in: https://portainer.duksosleepy.dev
-
-```bash
-vault.duksosleepy.dev {
-    tls {
-        dns cloudflare {env.CLOUDFLARE_API_TOKEN}
-    }
-
-    @websockets {
-        header Connection *Upgrade*
-        header Upgrade websocket
-    }
-    reverse_proxy @websockets 192.168.1.6:80
-
-    reverse_proxy 192.168.1.6:80 {
-        header_up X-Real-IP {remote_host}
-        header_up X-Forwarded-For {remote_host}
-        header_up X-Forwarded-Proto https
-        header_up X-Forwarded-Host {host}
-        header_up Host {host}
-        transport http {
-            keepalive 30s
-            keepalive_idle_conns 10
-        }
-    }
-}
-```
